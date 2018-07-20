@@ -101,7 +101,7 @@ d3.csv("data/merged_mod.csv", data => {
 	.on('click',(b) => {
 	    clickedButton = b;
 	    //remove tooltip
-	    d3.select('.tooltip').remove();
+	    d3.selectAll('.tooltip').remove();
 
 	    //update header
 	    d3.select('#header')
@@ -155,7 +155,6 @@ function update(data, property) {
 
     var nodes = data.map((e) => {
 	// scale radius to fit on the screen
-	
 	e.p_neutral = (e.tipologia !== "Scuola")? 0.5 : 2;	
 	var scaledRadius = radiusScale(+e[property]),
 	    scaledRadius2 = e[property + "_italia"] ? radiusScale(+e[property + "_italia"]) : 0,
@@ -217,7 +216,7 @@ function update(data, property) {
 	.force('cluster', clustering)
 	.on('tick', ticked);
 
-    // These are implementations of the custom forces.        
+    // implementations of the custom forces.        
     function clustering(alpha) {
 	nodes.forEach(function(d) {
             var cluster = clusters[d.cluster];
@@ -325,12 +324,22 @@ function drawLegend() {
 };
 
 function onCircleClick(d) {
-    d3.select('.tooltip').remove();
+    d3.selectAll('.tooltip')
+	.remove();
     
     var div = d3.select('body')
 	.append('div')
 	.attr('class', 'tooltip')
-	.on('click', () => div.remove());
+	.attr('id', 'tooltip');
+    
+    d3.select('body')
+	.append('div')
+	.attr('class', 'tooltip')
+        .attr('id', 'close')
+        .html('x')
+        .style("left", (d3.event.pageX + 400) + "px")
+        .style("top", (d3.event.pageY - 28) + "px")
+	.on('click', () => d3.selectAll('.tooltip').remove())
     
     div.transition()
 	.duration(500)	
@@ -341,18 +350,9 @@ function onCircleClick(d) {
     div.html(printTooltip(d, clickedButton))
 	.style("left", (d3.event.pageX - 300) + "px")			 
 	.style("top", (d3.event.pageY - 28) + "px");
-    
+    div.on('click', () => d3.selectAll('.tooltip').remove());
 };
 
-/*
-function onCircleMouseover(d) {
-    
-    d3.select(this)
-	.select('circle').transition()
-	.duration(750)
-	.attr('r', (d)=>{console.log(d);});
-}
-*/
 function parse(a) {
     if (isNaN(a))
 	return "-";
@@ -361,7 +361,6 @@ function parse(a) {
 };
 
 function printTooltip(d, b) {
-    console.log(b)
     var text = "Scuola di " + d.major_cat;
     if (d.tipologia !== "Scuola") {
         text = 
